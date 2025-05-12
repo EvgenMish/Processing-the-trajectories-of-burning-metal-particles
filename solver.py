@@ -220,7 +220,7 @@ def plot_results_table(filename='results.json'):
 
     plt.title('Результаты расчёта по выборкам', fontsize=14, pad=20)
     plt.tight_layout()
-    plt.savefig('results_table.png', bbox_inches='tight')
+    plt.savefig('./_RESULTS_PLOTS/results_table.png', bbox_inches='tight')
 
 def plot_all_Cd_vs_time(selection_data, dt=0.001):
     """
@@ -281,12 +281,12 @@ def plot_all_Cd_vs_time(selection_data, dt=0.001):
     fig.suptitle("Зависимость Cd от времени для всех выборок (по формуле get_Cd_Re_A)", fontsize=16)
     plt.tight_layout(pad=2.0, rect=[0.03, 0.03, 0.97, 0.95])
 
-def main():
-    with open('selections.json', 'r', encoding='utf-8') as f:
+def main(input_file='selections.json', output_file='results.json'):
+    with open(input_file, 'r', encoding='utf-8') as f:
         selection_data = json.load(f)
 
-    solve_eq(selection_data, dt_poly=0.001, output_filename='results.json')
-    plot_results_table(filename='results.json')
+    solve_eq(selection_data, dt_poly=0.001, output_filename=output_file)
+    plot_results_table(filename=output_file)
 
 
     plt.show()

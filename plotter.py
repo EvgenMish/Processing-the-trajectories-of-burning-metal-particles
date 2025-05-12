@@ -40,7 +40,7 @@ def plot_all_bins_DISTANCES(selection_data):
         fig.delaxes(axes[j])
 
     plt.tight_layout()
-    ##plt.show()
+    plt.savefig('./_RESULTS_PLOTS/dist_t_ALL.png', bbox_inches='tight')
 
 def plot_all_bins_av_SPEED(selection_data):
 
@@ -88,10 +88,11 @@ def plot_all_bins_av_SPEED(selection_data):
         fig.delaxes(axes[j])
 
     plt.tight_layout(pad=1.0, h_pad=14.0, w_pad=1.0, rect=[0.05, 0.05, 0.95, 0.95])
+    plt.savefig('./_RESULTS_PLOTS/vel_t_ALL.png', bbox_inches='tight')
 
     return initial_speeds_data  # возвращаем список (Dср, v0)
 
-def plot_initial_speed_vs_diameter_from_DISCRETE(bin_data):
+def OLD_plot_initial_speed_vs_diameter_from_DISCRETE(bin_data):
     diameters = []
     initial_speeds = []
 
@@ -126,7 +127,7 @@ def plot_initial_speed_vs_diameter_from_DISCRETE(bin_data):
     plt.grid(True)
     plt.legend()
 
-def plot_initial_speed_vs_diameter_from_POLYNOMS(initial_speeds_data):
+def OLD_plot_initial_speed_vs_diameter_from_POLYNOMS(initial_speeds_data):
     diameters = [item[0] for item in initial_speeds_data]
     initial_speeds = [item[1] for item in initial_speeds_data]
 
@@ -199,11 +200,13 @@ def plot_combined_initial_speed_vs_diameter(discrete_bin_data, polynom_initial_s
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
+    plt.savefig('./_RESULTS_PLOTS/init_vel_D_ALL.png', bbox_inches='tight')
 
-with open('selections.json', 'r', encoding='utf-8') as f:
-    selection_data = json.load(f)
+def main(input_file='selections.json'):
+    with open(input_file, 'r', encoding='utf-8') as f:
+        selection_data = json.load(f)
 
-plot_all_bins_DISTANCES(selection_data)
-initial_speeds_data = plot_all_bins_av_SPEED(selection_data)
-plot_combined_initial_speed_vs_diameter(selection_data, initial_speeds_data)
-plt.show()
+    plot_all_bins_DISTANCES(selection_data)
+    initial_speeds_data = plot_all_bins_av_SPEED(selection_data)
+    plot_combined_initial_speed_vs_diameter(selection_data, initial_speeds_data)
+    plt.show()

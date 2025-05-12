@@ -15,6 +15,7 @@ def plot_bT_D(data):
     plt.xlabel('D (мкм)')
     plt.ylabel('Tгор (c)')
     plt.grid(True)
+    plt.savefig('./_RESULTS_PLOTS/burnTimeD.png', bbox_inches='tight')
 
 def histogram_D(data, bins_count=10):
     plt.figure()
@@ -38,6 +39,7 @@ def histogram_D(data, bins_count=10):
     plt.ylabel('Частота')
     plt.grid(True)
     plt.xticks(bins, rotation=0)
+    plt.savefig('./_RESULTS_PLOTS/histogram.png', bbox_inches='tight')
 
     return bin_objects
 
@@ -152,9 +154,11 @@ def compute_particle_speeds(particles, dt=0.04):
 
 def main(input_file='particles_dist_final.json', output_file='selections.json'):
 
+    print(f'Обработка файла {input_file}...')
+
     data = json.load(open(input_file, 'r', encoding='utf-8'))
 
-    bin_objects = histogram_D(data, bins_count=20)
+    bin_objects = histogram_D(data, bins_count=40)
 
     stats_per_bin = get_bin_diameter_stats(bin_objects)
     
