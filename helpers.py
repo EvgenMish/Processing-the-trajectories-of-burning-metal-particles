@@ -81,27 +81,31 @@ def cut_distances_by_hits_and_convert(input_json, hits, output_json):
 
     particles = data["particles"]
     changed_count = 0
+    not_changed_count = 0
 
     for hit in hits:
         name = hit["particle"]
         hit_time = float(hit["hit"][0])
 
         for particle in particles:
+            ## если частица с таким именем
             if particle["name"] == name:
                 old_len = len(particle["distance"])
+                particle["hit"] = True
                 # Обрезаем distance по времени удара
                 particle["distance"] = [d for d in particle["distance"] if d[0] <= hit_time]
                 new_len = len(particle["distance"])
                 if new_len != old_len:
                     changed_count += 1
                 else: 
+                    not_changed_count += 1
                     print(f'Частица {name} потухла от удара')
                 break
 
     with open(output_json, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print(f'\033[92mГотово! Обрезаны траектории {changed_count} частиц с ударом. Данные сохранены в {output_json}\033[0m')
+    print(f'\033[92mГотово! Обрезаны траектории {changed_count} частиц с ударом, {not_changed_count} частиц потухли от удара. Данные сохранены в {output_json}\033[0m')
 
 
 def main():
@@ -114,4 +118,5 @@ def main():
     cut_distances_by_hits_and_convert(particles_json_filename, hits, output_json_filename) # обрезаем по времени удара и сохраняем в новый файл
     convert_distances_to_short(output_json_filename, output_json_filename) # конвертируем обратно в distance только
 
-main()
+if __name__ == "__main__":
+    main()

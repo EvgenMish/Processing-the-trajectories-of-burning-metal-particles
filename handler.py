@@ -3,31 +3,28 @@
 import json
 import matplotlib.pyplot as plt
 
-def plot_bT_D(data):
-    plt.figure()
-    burn_times = []
-    diameters = []
-    for particle in data['particles']:
-        burn_times.append(particle['burn_time'])
-        diameters.append(particle['diameter'])
-    plt.scatter(diameters, burn_times, c='blue', alpha=0.5)
-    plt.title('Зависимость времени горения от диаметра частицы')
-    plt.xlabel('D (мкм)')
-    plt.ylabel('Tгор (c)')
-    plt.grid(True)
-    plt.savefig('./_RESULTS_PLOTS/burnTimeD.png', bbox_inches='tight')
-
-def histogram_D(data, bins_count=10):
+def histogram_D(data, bins_count=10, include_hitted=True, include_NOT_hitted=True):
     plt.figure()
     diameters = []
+    filtered_particles = []
+
+    # Фильтрация частиц и сбор диаметров
     for particle in data['particles']:
+        hit = particle.get('hit', None)
+
+        if hit is True and not include_hitted:
+            continue
+        if (hit is False or hit is None) and not include_NOT_hitted:
+            continue
+
         diameters.append(particle['diameter'])
+        filtered_particles.append(particle)
 
-    counts, bins, _  = plt.hist(diameters, bins=bins_count, color='blue', alpha=0.7)
+    counts, bins, _ = plt.hist(diameters, bins=bins_count, color='blue', alpha=0.7)
 
-        # Группировка объектов по bin'ам
+    # Группировка отфильтрованных частиц по bin'ам
     bin_objects = [[] for _ in range(len(bins) - 1)]
-    for particle in data['particles']:
+    for particle in filtered_particles:
         d = particle['diameter']
         for i in range(len(bins) - 1):
             if bins[i] <= d < bins[i + 1] or (i == len(bins) - 2 and d == bins[-1]):
@@ -43,23 +40,7 @@ def histogram_D(data, bins_count=10):
 
     return bin_objects
 
-def plot_distanse_t(data):
-    plt.figure()
-    for particle in data['particles']:
-        distances = particle['distance']
-        times = [i*0.04 for i in range(len(distances))] 
-        plt.plot(times, distances, label=f"Частица {particle['name']}")
-    plt.title('Зависимость расстояния от времени для каждой частицы')
-    plt.xlabel('Время (с)')
-    plt.ylabel('Расстояние (см)')
-    plt.legend( loc='upper left', fontsize='small', frameon=False, bbox_to_anchor=(1, 1))
-    plt.grid(True)
-
-def OLD_print_all_diameters(data):
-    for particle in data['particles']:
-        print(particle['diameter'])
-
-def get_bin_diameter_stats(bin_objects):
+def get_bin_stats(bin_objects):
     stats_per_bin = []
 
     for bin_list in bin_objects:
@@ -127,15 +108,6 @@ def average_speeds_for_bin(bin_list):
 
     return averaged_speeds
 
-def OLD_compute_speeds(averaged_distances, dt=0.04):
-    speeds = []
-    for i in range(len(averaged_distances) - 1):
-        t = averaged_distances[i][0]
-        delta_s = averaged_distances[i+1][1] - averaged_distances[i][1]
-        v = round(delta_s / dt, 4)
-        speeds.append((t, v))
-    return speeds
-
 def compute_particle_speeds(particles, dt=0.04):
     """
     Вычисляет скорости для каждой частицы и записывает их в поле 'speed'.
@@ -152,19 +124,20 @@ def compute_particle_speeds(particles, dt=0.04):
 
         particle["speed"] = speeds
 
-def main(input_file='particles_dist_final.json', output_file='selections.json'):
+def main(input_file='particles_dist_final.json', output_file='selections.json', USE_HITTED_PARTICLES=True, USE_NOT_HITTED_PARTICLES=True, BINS=20):
 
     print(f'Обработка файла {input_file}...')
 
     data = json.load(open(input_file, 'r', encoding='utf-8'))
 
-    bin_objects = histogram_D(data, bins_count=40)
+    bin_objects = histogram_D(data, bins_count=BINS, include_hitted=USE_HITTED_PARTICLES, include_NOT_hitted=USE_NOT_HITTED_PARTICLES)  # Группировка объектов по диаметрам
+    #гистрограмма распределения диаметров частиц будет сохранена в ./_RESULTS_PLOTS/histogram.png
 
-    stats_per_bin = get_bin_diameter_stats(bin_objects)
+    stats_per_bin = get_bin_stats(bin_objects)
     
     # Вычисление общего количества частиц
     allCount = sum(stats[3] for stats in stats_per_bin)
-    print(f"Общее количество частиц: {allCount}")
+    print(f"Количество частиц для обработки: {allCount}")
 
     # Вывод статистики по каждой выборке
     for i, stats in enumerate(stats_per_bin):
@@ -174,7 +147,7 @@ def main(input_file='particles_dist_final.json', output_file='selections.json'):
     bin_data = []
     for i, (bin_list, stats) in enumerate(zip(bin_objects, stats_per_bin)):
 
-        compute_particle_speeds(bin_list)
+        compute_particle_speeds(bin_list, dt=0.04)  # Вычисляем скорости для каждой частицы в бине
 
         averaged_distances = average_distances_for_bin(bin_list)
         average_speeds = average_speeds_for_bin(bin_list)
@@ -196,11 +169,9 @@ def main(input_file='particles_dist_final.json', output_file='selections.json'):
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(bin_data, f, ensure_ascii=False, indent=4)
 
-    print(f'bin_objects сохранены в {output_file}')
+    print(f'Выборки сохранены в {output_file}')
+    print(f'Гистограмма распределения диаметров частиц сохранена в ./_RESULTS_PLOTS/histogram.png')
+    print("--"*20)
 
-    plot_distanse_t(data)     ##График зависимости расстояния от времени для каждой частицы
-    
-    plot_bT_D(data)  # График зависимости времени горения от диаметра частицы
-    plt.show()       # Отображение графика
-
-main()
+if __name__ == "__main__":
+    main()

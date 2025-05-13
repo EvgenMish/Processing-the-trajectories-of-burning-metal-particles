@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ### Константы
-ro = 2400  # Плотность частиц (г/см^3)
-ro_g = 0.17066 # Плотность газа (г/см^3)
-mu = 6.98 *10**-5 # Вязкость газа (г/(см*с))
+ro = 2400  # Плотность частиц (кг/м^3)
+ro_g = 0.17066 # Плотность газа (кг/м^3)
+mu = 6.98 *10**-5 # Вязкость газа (Па*с)
 g = 9.81 # Ускорение свободного падения (м/с^2)
 
 def get_velosity_polynom_coeffs_for_bin(bin_entry):
@@ -58,6 +58,7 @@ def solve_eq(selection_data, dt_poly=0.001, output_filename='results.json'):
         A_poly = []
 
         t = t_min + dt_poly
+
         while t <= t_max:
             t_prev = t - dt_poly
 
@@ -139,7 +140,7 @@ def solve_eq(selection_data, dt_poly=0.001, output_filename='results.json'):
     with open(output_filename, 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=4)
 
-    print(f'Результаты сохранены в {output_filename}')
+    print(f'\033[92mРезультаты сохранены в {output_filename}\033[0m')
 
 def plot_results_table(filename='results.json'):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -221,6 +222,7 @@ def plot_results_table(filename='results.json'):
     plt.title('Результаты расчёта по выборкам', fontsize=14, pad=20)
     plt.tight_layout()
     plt.savefig('./_RESULTS_PLOTS/results_table.png', bbox_inches='tight')
+    print(f'\033[92mТаблица результатов сохранена в ./_RESULTS_PLOTS/results_table.png\033[0m')
 
 def plot_all_Cd_vs_time(selection_data, dt=0.001):
     """
@@ -289,5 +291,7 @@ def main(input_file='selections.json', output_file='results.json'):
     plot_results_table(filename=output_file)
 
 
-    plt.show()
-main()
+    ##plt.show()
+
+if __name__ == "__main__":
+    main()

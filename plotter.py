@@ -202,11 +202,34 @@ def plot_combined_initial_speed_vs_diameter(discrete_bin_data, polynom_initial_s
     plt.tight_layout()
     plt.savefig('./_RESULTS_PLOTS/init_vel_D_ALL.png', bbox_inches='tight')
 
-def main(input_file='selections.json'):
+def plot_burnTime_D(selection_data):
+
+    burn_times = []
+    diameters = []
+
+    for i, bin_entry in enumerate(selection_data):
+        for particle in bin_entry['particles']:
+            burn_times.append(particle['burn_time'])
+            diameters.append(particle['diameter'])
+    plt.figure(figsize=(8, 8))
+    plt.scatter(diameters, burn_times, c='blue', alpha=0.5)
+    plt.title('Зависимость времени горения от диаметра частицы')
+    plt.xlabel('D (мкм)')
+    plt.ylabel('Tгор (c)')
+    plt.grid(True)
+    plt.savefig('./_RESULTS_PLOTS/burnTimeD.png', bbox_inches='tight')
+
+def main(input_file='selections.json', show_plots=True):
     with open(input_file, 'r', encoding='utf-8') as f:
         selection_data = json.load(f)
 
     plot_all_bins_DISTANCES(selection_data)
     initial_speeds_data = plot_all_bins_av_SPEED(selection_data)
     plot_combined_initial_speed_vs_diameter(selection_data, initial_speeds_data)
-    plt.show()
+    plot_burnTime_D(selection_data)
+
+    if show_plots:
+        plt.show()
+
+if __name__ == "__main__":
+    main()
